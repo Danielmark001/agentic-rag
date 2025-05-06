@@ -1,23 +1,94 @@
-# Agentic RAG
+# my-agentic-agent
 
-This agent enhances the Agent Starter Pack with a production-ready data ingestion pipeline, enriching your Retrieval Augmented Generation (RAG) applications. You will be able to ingest, process, and embed custom data, improving the relevance and context of your generated responses. You can choose between different datastore options including Vertex AI Search and Vertex AI Vector Search depending on your specific needs.
+ADK RAG agent for document retrieval and Q&A. Includes a data pipeline for ingesting and indexing documents into Vertex AI Search or Vector Search.
+Agent generated with [`googleCloudPlatform/agent-starter-pack`](https://github.com/GoogleCloudPlatform/agent-starter-pack) version `0.3.9`
 
-The agent provides the infrastructure to create a Vertex AI Pipeline with your custom code. Because it's built on Vertex AI Pipelines, you benefit from features like scheduled runs, recurring executions, and on-demand triggers. For processing terabyte-scale data, we recommend combining Vertex AI Pipelines with data analytics tools like BigQuery or Dataflow.
+## Project Structure
 
-![search agent demo](https://storage.googleapis.com/github-repo/generative-ai/sample-apps/e2e-gen-ai-app-starter-pack/starter-pack-search-pattern.gif)
+This project is organized as follows:
 
-## Architecture
+```
+my-agentic-agent/
+├── app/                 # Core application code
+│   ├── agent.py         # Main agent logic
+│   ├── agent_engine_app.py # Agent Engine application logic
+│   └── utils/           # Utility functions and helpers
+├── deployment/          # Infrastructure and deployment scripts
+├── notebooks/           # Jupyter notebooks for prototyping and evaluation
+├── tests/               # Unit, integration, and load tests
+├── Makefile             # Makefile for common commands
+└── pyproject.toml       # Project dependencies and configuration
+```
 
-The agent implements the following architecture:
+## Requirements
 
-![architecture diagram](https://storage.googleapis.com/github-repo/generative-ai/sample-apps/e2e-gen-ai-app-starter-pack/agentic_rag_vertex_ai_search_architecture.png)
+Before you begin, ensure you have:
+- **uv**: Python package manager - [Install](https://docs.astral.sh/uv/getting-started/installation/)
+- **Google Cloud SDK**: For GCP services - [Install](https://cloud.google.com/sdk/docs/install)
+- **Terraform**: For infrastructure deployment - [Install](https://developer.hashicorp.com/terraform/downloads)
+- **make**: Build automation tool - [Install](https://www.gnu.org/software/make/) (pre-installed on most Unix-based systems)
 
-### Key Features
 
-- **Built on Agent Development Kit (ADK):** ADK is a flexible, modular framework for developing and deploying AI agents. It integrates with the Google ecosystem and Gemini models, supporting various LLMs and open-source AI tools, enabling both simple and complex agent architectures.
-- **Flexible Datastore Options:** Choose between Vertex AI Search or Vertex AI Vector Search for efficient data storage and retrieval based on your specific needs.
-- **Automated Data Ingestion Pipeline:** Automates the process of ingesting data from input sources.
-- **Custom Embeddings:** Generates embeddings using Vertex AI Embeddings and incorporates them into your data for enhanced semantic search.
-- **Terraform Deployment:** Ingestion pipeline is instantiated with Terraform alongside the rest of the infrastructure of the starter pack.
-- **Cloud Build Integration:** Deployment of ingestion pipelines is added to the CD pipelines of the starter pack.
-- **Customizable Code:** Easily adapt and customize the code to fit your specific application needs and data sources.
+## Quick Start (Local Testing)
+
+Install required packages and launch the local development environment:
+
+```bash
+make install && make playground
+```
+
+## Commands
+
+| Command              | Description                                                                                 |
+| -------------------- | ------------------------------------------------------------------------------------------- |
+| `make install`       | Install all required dependencies using uv                                                  |
+| `make playground`    | Launch Streamlit interface for testing agent locally and remotely |
+| `make backend`       | Deploy agent to Agent Engine |
+| `make test`          | Run unit and integration tests                                                              |
+| `make lint`          | Run code quality checks (codespell, ruff, mypy)                                             |
+| `make setup-dev-env` | Set up development environment resources using Terraform                                    |
+| `make data-ingestion`| Run data ingestion pipeline in the Dev environment                                           |
+| `uv run jupyter lab` | Launch Jupyter notebook                                                                     |
+
+For full command options and usage, refer to the [Makefile](Makefile).
+
+
+## Usage
+
+This template follows a "bring your own agent" approach - you focus on your business logic, and the template handles everything else (UI, infrastructure, deployment, monitoring).
+
+1. **Prototype:** Build your Generative AI Agent using the intro notebooks in `notebooks/` for guidance. Use Vertex AI Evaluation to assess performance.
+2. **Integrate:** Import your agent into the app by editing `app/agent.py`.
+3. **Test:** Explore your agent functionality using the Streamlit playground with `make playground`. The playground offers features like chat history, user feedback, and various input types, and automatically reloads your agent on code changes.
+4. **Deploy:** Set up and initiate the CI/CD pipelines, customizing tests as necessary. Refer to the [deployment section](#deployment) for comprehensive instructions. For streamlined infrastructure deployment, simply run `agent-starter-pack setup-cicd`. Check out the [`agent-starter-pack setup-cicd` CLI command](https://github.com/GoogleCloudPlatform/agent-starter-pack/blob/main/docs/cli/setup_cicd.md). Currently only supporting Github.
+5. **Monitor:** Track performance and gather insights using Cloud Logging, Tracing, and the Looker Studio dashboard to iterate on your application.
+
+
+## Deployment
+
+> **Note:** For a streamlined one-command deployment of the entire CI/CD pipeline and infrastructure using Terraform, you can use the [`agent-starter-pack setup-cicd` CLI command](https://github.com/GoogleCloudPlatform/agent-starter-pack/blob/main/docs/cli/setup_cicd.md). Currently only supporting Github.
+
+### Dev Environment
+
+You can test deployment towards a Dev Environment using the following command:
+
+```bash
+gcloud config set project <your-dev-project-id>
+make backend
+```
+
+
+The repository includes a Terraform configuration for the setup of the Dev Google Cloud project.
+See [deployment/README.md](deployment/README.md) for instructions.
+
+### Production Deployment
+
+The repository includes a Terraform configuration for the setup of a production Google Cloud project. Refer to [deployment/README.md](deployment/README.md) for detailed instructions on how to deploy the infrastructure and application.
+
+
+## Monitoring and Observability
+> You can use [this Looker Studio dashboard](https://lookerstudio.google.com/reporting/46b35167-b38b-4e44-bd37-701ef4307418/page/tEnnC
+) template for visualizing events being logged in BigQuery. See the "Setup Instructions" tab to getting started.
+
+The application uses OpenTelemetry for comprehensive observability with all events being sent to Google Cloud Trace and Logging for monitoring and to BigQuery for long term storage.
+#
